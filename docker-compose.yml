@@ -1,0 +1,30 @@
+version: '3'
+services:
+  sk_example:
+    build: .
+    container_name: sk_example
+    ports:
+      - 8080:8080
+    depends_on:
+      - flyway
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/sk_example_db
+      SPRING_DATASOURCE_USERNAME: sk_example_user
+      SPRING_DATASOURCE_PASSWORD: sk_example_user
+  flyway:
+      image: flyway/flyway
+      container_name: sk_example-flyway
+      command: -url=jdbc:postgresql://postgres-db:5432/sk_example_db -user=sk_example_user -password=sk_example_user -connectRetries=60 migrate
+      volumes:
+          - ./src/main/resources/db/migration/:/flyway/sql
+      depends_on:
+          - postgres-db
+  postgres-db:
+    container_name: sk_example-postgres
+    image: postgres:latest
+    ports:
+       - 5434:5432
+    environment:
+        POSTGRES_USER: sk_example_user
+        POSTGRES_DB: sk_example_db
+        POSTGRES_PASSWORD: sk_example_user
